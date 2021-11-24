@@ -9,3 +9,5 @@ At the top-level, we will have a folder for each day : `01`, `02`, ...
 For each day repo, there will be one folder for each user doing the challenge. You could use your github handle or any name that you choose.
 
 In this folder, you are free to do whatever you want to do !
+
+Of course, you are free to participate whenever you wish to do so. Don't feel forced to anything.
