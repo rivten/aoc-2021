@@ -3,9 +3,6 @@ module Main where
 import System.IO
 import Data.List.Split
 
-getList :: [Char] -> [Int]
-getList content = map read $ filter ((/= 0) . length) $ splitOn "\n" content
-
 increaseMap :: [Int] -> [Bool]
 increaseMap xs = zipWith (<) xs (tail xs)
 
@@ -16,5 +13,5 @@ increaseSlidingMap _ = []
 main :: IO ()
 main = do
     content <- hGetContents stdin
-    print $ length $ filter id $ increaseMap $ getList content
-    print $ length $ filter id $ increaseSlidingMap $ getList content
+    print $ length $ filter id $ increaseMap $ map read $ lines content
+    print $ length $ filter id $ increaseSlidingMap $ map read $ lines content
