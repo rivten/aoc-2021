@@ -1,15 +1,7 @@
-private val REPORT = """199
-200
-208
-210
-200
-207
-240
-269
-260
-263"""
+import java.io.File
 
-val largerCount = REPORT.lines()
+val largerCount = File("input.txt").readLines()
+    .filter { it.length > 0 }
     .zipWithNext()
     .map { it.second.toInt() - it.first.toInt() }
     .count { it > 0 }
