@@ -4,11 +4,10 @@ import System.IO
 import Data.List.Split
 
 increaseMap :: [Int] -> [Bool]
-increaseMap xs = zipWith (<) xs (tail xs)
+increaseMap xs = zipWith (<) xs $ tail xs
 
 increaseSlidingMap :: [Int] -> [Bool]
-increaseSlidingMap (w:rem@(_:_:z:_)) = (w < z):(increaseSlidingMap rem)
-increaseSlidingMap _ = []
+increaseSlidingMap xs = zipWith (<) xs $ iterate tail xs !! 3
 
 main :: IO ()
 main = do
