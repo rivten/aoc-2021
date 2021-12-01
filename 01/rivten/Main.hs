@@ -1,7 +1,6 @@
 module Main where
 
 import System.IO
-import Data.List.Split
 
 increaseMap :: [Int] -> [Bool]
 increaseMap xs = zipWith (<) xs $ tail xs
