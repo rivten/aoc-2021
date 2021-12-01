@@ -9,7 +9,12 @@ getList content = map read $ filter ((/= 0) . length) $ splitOn "\n" content
 increaseMap :: [Int] -> [Bool]
 increaseMap xs = zipWith (\x y -> x < y) xs (tail xs)
 
+increaseSlidingMap :: [Int] -> [Bool]
+increaseSlidingMap (w:x:y:z:xs) = (w < z):(increaseSlidingMap (x:y:z:xs))
+increaseSlidingMap _ = []
+
 main :: IO ()
 main = do
     content <- hGetContents stdin
     print $ length $ filter id $ increaseMap $ getList content
+    print $ length $ filter id $ increaseSlidingMap $ getList content
