@@ -7,7 +7,7 @@ getList :: [Char] -> [Int]
 getList content = map read $ filter ((/= 0) . length) $ splitOn "\n" content
 
 increaseMap :: [Int] -> [Bool]
-increaseMap xs = zipWith (\x y -> x < y) xs (tail xs)
+increaseMap xs = zipWith (<) xs (tail xs)
 
 increaseSlidingMap :: [Int] -> [Bool]
 increaseSlidingMap (w:x:y:z:xs) = (w < z):(increaseSlidingMap (x:y:z:xs))
