@@ -7,9 +7,7 @@ getList :: [Char] -> [Int]
 getList content = map read $ filter ((/= 0) . length) $ splitOn "\n" content
 
 increaseMap :: [Int] -> [Bool]
-increaseMap [] = []
-increaseMap [_] = []
-increaseMap (x:y:xs) = (if x < y then True else False):(increaseMap (y:xs))
+increaseMap xs = zipWith (\x y -> x < y) xs (tail xs)
 
 main :: IO ()
 main = do
