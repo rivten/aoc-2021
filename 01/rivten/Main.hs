@@ -7,7 +7,7 @@ increaseMap :: [Int] -> [Bool]
 increaseMap xs = zipWith (<) xs (tail xs)
 
 increaseSlidingMap :: [Int] -> [Bool]
-increaseSlidingMap (w:x:y:z:xs) = (w < z):(increaseSlidingMap (x:y:z:xs))
+increaseSlidingMap (w:rem@(_:_:z:_)) = (w < z):(increaseSlidingMap rem)
 increaseSlidingMap _ = []
 
 main :: IO ()
