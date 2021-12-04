@@ -1,21 +1,30 @@
 import 'dart:io';
 
-List<U> mapIndexed<T, U>(List<T> arr, U callback(T e, int i)){
-  List<U> arrayCopy = [];
-  for(var i = 0; i < arr.length; i++ ) {
-    arrayCopy.add(callback(arr[i], i));
-  }
-  return arrayCopy;
-}
+import 'KdartExtension.dart';
 
 void main() async {
-  var content = await File('./input.txt').readAsLines();
+  var intList = (await File('./input.txt').readAsLines())
+      .map((e) => int.tryParse(e) ?? 0)
+      .toList();
 
-  var zippedLines = mapIndexed(content, (String e, i) {
-    if(i==0) return [0, 0];
-    else return [int.tryParse(content[i-1]), int.tryParse(e) ?? 0];
-  });
+  /**
+   * Part 1
+   */
+  var partOneResult = intList
+      .zipWithNext(transform: (a, b) => (b-a))
+      .count((item) => item > 0);
 
-  var filteredZippedLine = zippedLines.where((element) => (element[0] ?? 0) < (element[1]??0));
-  print(filteredZippedLine.length);
+  print("Day 1/part 1 result: $partOneResult");
+
+  /**
+   * Part 2
+   */
+  var partTwoResult = intList
+      .windowed(size: 3, step: 1)
+      .map((list) => list.sum())
+      .toList()
+      .zipWithNext(transform: (a, b) => (b-a))
+      .count((item) => item > 0);
+
+  print("Day 1/part 2 result: $partTwoResult");
 }
