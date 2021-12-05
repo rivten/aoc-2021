@@ -27,13 +27,12 @@ parseInput :: [String] -> [Segment]
 parseInput = map parseSegment
 
 countRepeatingElements :: Eq a => [a] -> Int
-countRepeatingElements [] = 0
-countRepeatingElements (a:as) = aux a False 0 as
-    where aux :: Eq a => a -> Bool -> Int -> [a] -> Int
-          aux _ _ count [] = count
-          aux e True count (x:xs) | e == x = aux e True count xs
-          aux e False count (x:xs) | e == x = aux e True (count + 1) xs
-          aux _ _ count (x:xs) = aux x False count xs
+countRepeatingElements = (\(s, _, _) -> s) . foldr aux (0, Nothing, False)
+    where aux :: Eq a => a -> (Int, Maybe a, Bool) -> (Int, Maybe a, Bool)
+          aux e (score, Nothing, _) = (score, Just e, False)
+          aux e (score, Just n, True) | e == n = (score, Just n, True)
+          aux e (score, Just n, False) | e == n = (score + 1, Just n, True)
+          aux e (score, Just _, _) = (score, Just e, False)
 
 main :: IO ()
 main = interact $ show . countRepeatingElements . sort . concat . map coveredPoints . filter isStraightLine . parseInput . lines
