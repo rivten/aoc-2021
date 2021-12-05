@@ -4,4 +4,3 @@ run: Main
 
 Main: Main.hs
 	ghc -Wall -Werror -dynamic -o $@ $<
-	#ghc -dynamic -o $@ $<

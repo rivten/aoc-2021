@@ -21,7 +21,15 @@ isStraightLine _ = False
 coveredPoints :: Segment -> [(Int, Int)]
 coveredPoints (Segment { start = (xS, yS), end = (xE, yE) }) | xS == xE = [(xS, y) | y <- [(min yS yE)..(max yS yE)]]
 coveredPoints (Segment { start = (xS, yS), end = (xE, yE) }) | yS == yE = [(x, yS) | x <- [(min xS xE)..(max xS xE)]]
-coveredPoints _  = undefined
+coveredPoints (Segment { start = (xS, yS), end = (xE, yE) }) 
+  | abs (xE - xS) == abs (yE - yS) && (xS < xE && yS < yE) = [(xS + delta, yS + delta) | delta <- [0..(abs (xE - xS))]]
+coveredPoints (Segment { start = (xS, yS), end = (xE, yE) }) 
+  | abs (xE - xS) == abs (yE - yS) && (xS > xE && yS > yE) = [(xS - delta, yS - delta) | delta <- [0..(abs (xE - xS))]]
+coveredPoints (Segment { start = (xS, yS), end = (xE, yE) }) 
+  | abs (xE - xS) == abs (yE - yS) && (xS < xE && yS > yE) = [(xS + delta, yS - delta) | delta <- [0..(abs (xE - xS))]]
+coveredPoints (Segment { start = (xS, yS), end = (xE, yE) }) 
+  | abs (xE - xS) == abs (yE - yS) && (xS > xE && yS < yE) = [(xS - delta, yS + delta) | delta <- [0..(abs (xE - xS))]]
+coveredPoints _ = undefined
 
 parseInput :: [String] -> [Segment]
 parseInput = map parseSegment
@@ -35,4 +43,5 @@ countRepeatingElements = (\(s, _, _) -> s) . foldr aux (0, Nothing, False)
           aux e (score, Just _, _) = (score, Just e, False)
 
 main :: IO ()
-main = interact $ show . countRepeatingElements . sort . concat . map coveredPoints . filter isStraightLine . parseInput . lines
+--main = interact $ show . countRepeatingElements . sort . concat . map coveredPoints . filter isStraightLine . parseInput . lines
+main = interact $ show . countRepeatingElements . sort . concat . map coveredPoints . parseInput . lines
