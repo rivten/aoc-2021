@@ -34,6 +34,12 @@ extension Kdart<T> on List<T> {
   int count(bool callback(T item)){
     return this.fold(0, (prev, item) => callback(item)? prev + 1: prev);
   }
+
+  void forEachIndexed(void callback(T item, int index)){
+    for (var i = 0; i < this.length; ++i) {
+      callback(this[i], i);
+    }
+  }
 }
 
 extension KdartInt<T extends int> on List<T> {
@@ -41,3 +47,4 @@ extension KdartInt<T extends int> on List<T> {
     return this.fold(0, (int prev, int curr) => prev + curr);
   }
 }
+
