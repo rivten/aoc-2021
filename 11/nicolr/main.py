@@ -12,7 +12,7 @@ def step(array_map, n=1):
 
 def increase_energy_after_flash(array_map):
 	flash_array = np.pad(array_map >= 10, pad_width=1, constant_values=False)
-	array_map = np.where(array_map < 10, array_map, -1000)
+	array_map = np.where(array_map < 10, array_map, -array_map.size * 10)
 
 	down = np.roll(flash_array, shift = 1, axis=0)[1:-1, 1:-1].astype(int)
 	up = np.roll(flash_array, shift = -1, axis=0)[1:-1, 1:-1].astype(int)
@@ -37,7 +37,7 @@ if __name__ =="__main__":
 	step_count = 1
 	while True:
 		array_map, flash_count = step(array_map)
-		if flash_count == array_map.shape[0] * array_map.shape[1]:
+		if flash_count == array_map.size:
 			break
 		step_count +=1
 	print(f"Part2: {step_count}")
