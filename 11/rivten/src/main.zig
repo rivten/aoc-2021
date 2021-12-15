@@ -76,7 +76,7 @@ fn doOneStep(octopuses: *[line_count][col_count]u8, flash_count: *usize) !void {
     for (flashed_octopus.items) |flashed| {
         octopuses[flashed[0]][flashed[1]] = 0;
     }
-    flash_count.* += flashed_octopus.items.len;
+    flash_count.* = flashed_octopus.items.len;
 }
 
 pub fn main() anyerror!void {
@@ -94,8 +94,13 @@ pub fn main() anyerror!void {
 
     var step_index: usize = 0;
     var flash_count: usize = 0;
-    while (step_index < 100) : (step_index += 1) {
-        try doOneStep(&octopuses, &flash_count);
+    var all_flash_step = false;
+    while (!all_flash_step) : (step_index += 1) {
+        if (@mod(step_index, 100) == 0) std.debug.print("Doing step {}\n", .{step_index + 1});
+        var step_flash_count: usize = 0;
+        try doOneStep(&octopuses, &step_flash_count);
+        flash_count += step_flash_count;
+        all_flash_step = step_flash_count == col_count * line_count;
 
         //std.debug.print("\nAfter step {}:\n", .{step_index + 1});
         //for (octopuses) |line| {
@@ -105,5 +110,6 @@ pub fn main() anyerror!void {
         //    std.debug.print("\n", .{});
         //}
     }
-    std.debug.print("{}\n", .{flash_count});
+    //std.debug.print("{}\n", .{flash_count});
+    std.debug.print("{}\n", .{step_index});
 }
