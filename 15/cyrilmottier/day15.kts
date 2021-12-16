@@ -1,119 +1,126 @@
 import java.io.File
-import kotlin.time.measureTime
+import kotlin.math.max
 
-data class Graph<T>(
-    val vertices: Set<T>,
-    val edges: Map<T, Set<T>>,
-    val weights: Map<Pair<T, T>, Int>
-)
+fun dijkstra(graph: List<List<Int>>, isPart2: Boolean = false): Pair<IntArray, IntArray> {
 
-fun <T> dijkstra(graph: Graph<T>, start: T): Map<T, T?> {
-    val S: MutableSet<T> = mutableSetOf() // a subset of vertices, for which we know the true distance
+    val originalWidth = graph[0].size
+    val originalHeight = graph.size
 
-    val delta = graph.vertices.map { it to Int.MAX_VALUE }.toMap().toMutableMap()
-    delta[start] = 0
+    val multipler = if (isPart2) 5 else 1
 
-    val previous: MutableMap<T, T?> = graph.vertices.map { it to null }.toMap().toMutableMap()
+    val width = originalWidth * multipler
+    val height = originalHeight * multipler
 
-    while (S != graph.vertices) {
-        val v: T = delta
-            .filter { !S.contains(it.key) }
-            .minByOrNull { it.value }!!
-            .key
+    val end = width * height - 1
 
-        graph.edges.getValue(v).minus(S).forEach { neighbor ->
-            val newPath = delta.getValue(v) + graph.weights.getValue(Pair(v, neighbor))
+    val queue = mutableSetOf<Int>()
+    val dist = IntArray(width * height)
+    val prev = IntArray(width * height)
 
-            if (newPath < delta.getValue(neighbor)) {
-                delta[neighbor] = newPath
-                previous[neighbor] = v
+    (0 until (width * height)).forEach {
+        dist[it] = Int.MAX_VALUE
+        queue.add(it)
+    }
+
+    dist[0] = 0
+
+    fun graphValue(row: Int, col: Int): Int {
+        return if (isPart2) {
+            val originalRow = row % originalHeight
+            val originalCol = col % originalWidth
+            val originalValue = graph[originalRow][originalCol]
+            val r = originalValue + row / originalHeight + col / originalWidth
+            if (r <= 9) r else r % 9
+        } else {
+            graph[row][col]
+        }
+    }
+
+    while (queue.isNotEmpty()) {
+        var minDist = Int.MAX_VALUE
+        var minU = 0
+        queue.forEach {
+            if (dist[it] < minDist) {
+                minDist = dist[it]
+                minU = it
             }
         }
+        queue.remove(minU)
 
-        S.add(v)
+        if (minU == end) {
+            // We're done
+            return dist to prev
+        }
+
+        val colOfU = minU % width
+        val rowOfU = minU / width
+
+        if (rowOfU > 0) {
+            val adjacentRow = rowOfU - 1
+            val adjacentCol = colOfU
+            val alt = dist[minU] + graphValue(adjacentRow, adjacentCol)
+            val index = adjacentRow * width + adjacentCol
+            if (alt < dist[index]) {
+                dist[index] = alt
+                prev[index] = minU
+            }
+        }
+        if (rowOfU + 1 <= height - 1) {
+            val adjacentRow = rowOfU + 1
+            val adjacentCol = colOfU
+            val alt = dist[minU] + graphValue(adjacentRow, adjacentCol)
+            val index = adjacentRow * width + adjacentCol
+            if (alt < dist[index]) {
+                dist[index] = alt
+                prev[index] = minU
+            }
+        }
+        if (colOfU > 0) {
+            val adjacentRow = rowOfU
+            val adjacentCol = colOfU - 1
+            val alt = dist[minU] + graphValue(adjacentRow, adjacentCol)
+            val index = adjacentRow * width + adjacentCol
+            if (alt < dist[index]) {
+                dist[index] = alt
+                prev[index] = minU
+            }
+        }
+        if (colOfU + 1 <= width - 1) {
+            val adjacentRow = rowOfU
+            val adjacentCol = colOfU + 1
+            val alt = dist[minU] + graphValue(adjacentRow, adjacentCol)
+            val index = adjacentRow * width + adjacentCol
+            if (alt < dist[index]) {
+                dist[index] = alt
+                prev[index] = minU
+            }
+        }
     }
 
-    return previous.toMap()
+    return dist to prev
 }
 
-fun <T> shortestPath(shortestPathTree: Map<T, T?>, start: T, end: T): List<T> {
-    fun pathTo(start: T, end: T): List<T> {
-        if (shortestPathTree[end] == null) return listOf(end)
-        return listOf(pathTo(start, shortestPathTree[end]!!), listOf(end)).flatten()
-    }
 
-    return pathTo(start, end)
+val input = File("input.txt").readLines().map { line ->
+    line.map { it.digitToInt() }
 }
 
-val rawInput = File("input.txt").readLines()
-val boardWidth = rawInput[0].length
-val boardHeight = rawInput.size
+repeat(1) {
+    println("Starting part1…")
+    val now = System.currentTimeMillis()
 
-val vertices = (0 until boardHeight).flatMap { line ->
-    (0 until boardWidth).map {
-        line to it
-    }
+    val (dist, _) = dijkstra(input)
+
+    println("dist: ${dist[dist.size - 1]}")
+    println("in ${System.currentTimeMillis() - now}ms")
 }
-    .toSet()
 
-val edges = (0 until boardHeight).flatMap { row ->
-    (0 until boardWidth).map { col ->
-        val adjacents = mutableSetOf<Pair<Int, Int>>()
-        if (row > 0) {
-            adjacents.add((row - 1) to col)
-        }
-        if (row + 1 <= boardHeight - 1) {
-            adjacents.add((row + 1) to col)
-        }
-        if (col > 0) {
-            adjacents.add(row to (col - 1))
-        }
-        if (col + 1 <= boardWidth - 1) {
-            adjacents.add(row to (col + 1))
-        }
-        (row to col) to adjacents
-    }
-}.toMap()
+repeat(1) {
+    println("Starting part2…")
+    val now = System.currentTimeMillis()
 
-val weights = (0 until boardHeight).flatMap { row ->
-    (0 until boardWidth).flatMap { col ->
-        val result = mutableListOf<Pair<Pair<Pair<Int, Int>, Pair<Int, Int>>, Int>>()
-        if (row > 0) {
-            result.add(((row to col) to ((row - 1) to col)) to rawInput[row - 1][col].digitToInt())
-        }
-        if (row + 1 <= boardHeight - 1) {
-            result.add(((row to col) to ((row + 1) to col)) to rawInput[row + 1][col].digitToInt())
-        }
-        if (col > 0) {
-            result.add(((row to col) to (row to (col - 1))) to rawInput[row][col - 1].digitToInt())
-        }
-        if (col + 1 <= boardWidth - 1) {
-            result.add(((row to col) to (row to (col + 1))) to rawInput[row][col + 1].digitToInt())
-        }
-        result
-    }
-}.toMap()
+    val (dist, _) = dijkstra(input, true)
 
-val start = 0 to 0
-val end = (boardHeight - 1) to (boardWidth - 1)
-val graph = Graph(
-    vertices,
-    edges,
-    weights
-)
-
-val now = System.currentTimeMillis()
-
-    val shortestPathTree = dijkstra(graph, start)
-    val shortestPath = shortestPath(shortestPathTree, start, end)
-
-    val count = shortestPath.drop(1)
-        .fold(0) { acc, (row, col) ->
-            acc + rawInput[row][col].digitToInt()
-        }
-
-    println(shortestPath)
-    println(count)
-
-println("in ${System.currentTimeMillis() - now}ms")
-
+    println("dist: ${dist[dist.size - 1]}")
+    println("in ${System.currentTimeMillis() - now}ms")
+}
