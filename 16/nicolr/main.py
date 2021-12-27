@@ -1,5 +1,14 @@
-from math import ceil 
 from functools import reduce
+
+eval_func ={
+	0:sum,
+	1:lambda z: reduce(lambda x,y: x*y, z),
+	2:min,
+	3:max,
+	5:lambda x: int(x[0] >= x[1]),
+	6:lambda x: int(x[0] <= x[1]),
+	7:lambda x: int(x[0] == x[1])
+}
 
 def binary(num, length):
     return format(num, '#0{}b'.format(length + 2))
@@ -31,9 +40,9 @@ class Packet:
 	def literal_parser(self):
 		literal_code = 0
 		while self.read_next_n_bits(1):
-			literal_code += self.read_next_n_bits(4)
+			literal_code |= self.read_next_n_bits(4)
 			literal_code <<= 4
-		literal_code += self.read_next_n_bits(4)
+		literal_code |= self.read_next_n_bits(4)
 		return [literal_code]
 
 	def operator_parser(self):
@@ -80,24 +89,11 @@ class Packet:
 		return Packet(bin_packet)
 
 	def eval(self):
-		if self.type_id == 4:
+		if self.packet_type == "literal":
 			return self.content[0]
-		evaluation = map(lambda p: p.eval(), self.content)
-		if self.type_id == 0:
-			result = sum(evaluation)
-		elif self.type_id == 1:
-			result = reduce(lambda x,y: x*y, evaluation)
-		elif self.type_id == 2:
-			result = min(evaluation)
-		elif self.type_id == 3:
-			result = max(evaluation)
-		elif self.type_id == 5:
-			result = int(next(evaluation) >= next(evaluation))
-		elif self.type_id == 6:
-			result = int(next(evaluation) <= next(evaluation))
-		elif self.type_id == 7:
-			result = int(next(evaluation) == next(evaluation))
-		return result
+		else:
+			evaluation = list(map(lambda p: p.eval(), self.content))
+			return eval_func[self.type_id](evaluation)
 
 if __name__ =="__main__":
 	with open('input.txt') as f:input_file = f.read().strip()
