@@ -55,10 +55,22 @@ fn main() {
 
     for fold in folds {
         do_fold(&mut points, fold);
-        println!("{}", points.len());
     }
 
-    for p in points {
-        println!("{:?}", p);
+    let min_x = *points.iter().map(|(x, _)| x).min().unwrap();
+    let max_x = *points.iter().map(|(x, _)| x).max().unwrap();
+
+    let min_y = *points.iter().map(|(_, y)| y).min().unwrap();
+    let max_y = *points.iter().map(|(_, y)| y).max().unwrap();
+
+    for y in min_y..(max_y + 1) {
+        for x in min_x..(max_x + 1) {
+            if points.contains(&(x, y)) {
+                print!("#");
+            } else {
+                print!(".");
+            }
+        }
+        print!("\n");
     }
 }
