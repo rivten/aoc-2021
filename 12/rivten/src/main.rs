@@ -2,7 +2,7 @@ use std::io::BufRead;
 
 struct PathIterator<'a> {
     graph: &'a std::collections::HashMap<String, Vec<String>>,
-    stack: Vec<(Vec<&'a str>, Vec<&'a str>)>,
+    stack: Vec<(Vec<&'a str>, Vec<&'a str>, bool)>,
 }
 
 impl<'a> PathIterator<'a> {
@@ -17,6 +17,7 @@ impl<'a> PathIterator<'a> {
                     .iter()
                     .map(String::as_str)
                     .collect(),
+                false,
             )],
         }
     }
@@ -26,20 +27,37 @@ impl<'a> std::iter::Iterator for PathIterator<'a> {
     type Item = Vec<&'a str>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let (next_path_to_evaluate, next_possible_vertices) = self.stack.pop()?;
-        //println!("{:?} {:?}", next_path_to_evaluate, next_possible_vertices);
+        let (next_path_to_evaluate, next_possible_vertices, single_small_cave_visited_twice) =
+            self.stack.pop()?;
+        //println!(
+        //    "{:?} {:?} {:?}",
+        //    next_path_to_evaluate, next_possible_vertices, single_small_cave_visited_twice
+        //);
         for v in next_possible_vertices {
             let is_small_cave = v.chars().next().unwrap().is_ascii_lowercase();
-            if is_small_cave && next_path_to_evaluate.contains(&v) {
+            let visit_count = next_path_to_evaluate
+                .iter()
+                .filter(|&test_v| test_v == &v)
+                .count();
+            if is_small_cave && single_small_cave_visited_twice && visit_count >= 1 {
+                continue;
+            } else if is_small_cave && !single_small_cave_visited_twice && visit_count >= 2 {
                 continue;
             }
             let mut to_push = next_path_to_evaluate.clone();
             to_push.push(v.clone());
             if let Some(next_vertices) = self.graph.get(v) {
-                self.stack
-                    .push((to_push, next_vertices.iter().map(String::as_str).collect()));
+                self.stack.push((
+                    to_push,
+                    next_vertices.iter().map(String::as_str).collect(),
+                    single_small_cave_visited_twice || (is_small_cave && visit_count >= 1),
+                ));
             } else {
-                self.stack.push((to_push, vec![]));
+                self.stack.push((
+                    to_push,
+                    vec![],
+                    single_small_cave_visited_twice || (is_small_cave && visit_count >= 1),
+                ));
             }
         }
 
@@ -62,12 +80,14 @@ fn main() {
         let start = splitted_line.next().unwrap();
         let end = splitted_line.next().unwrap();
 
-        graph
-            .entry(start.to_string())
-            .or_insert(Vec::<String>::new())
-            .push(end.to_string());
+        if start != "end" && end != "start" {
+            graph
+                .entry(start.to_string())
+                .or_insert(Vec::<String>::new())
+                .push(end.to_string());
+        }
 
-        if end != "end" {
+        if end != "end" && start != "start" {
             graph
                 .entry(end.to_string())
                 .or_insert(Vec::<String>::new())
