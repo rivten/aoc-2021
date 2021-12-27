@@ -5,8 +5,8 @@ eval_func ={
 	1:lambda z: reduce(lambda x,y: x*y, z),
 	2:min,
 	3:max,
-	5:lambda x: int(x[0] >= x[1]),
-	6:lambda x: int(x[0] <= x[1]),
+	5:lambda x: int(x[0] > x[1]),
+	6:lambda x: int(x[0] < x[1]),
 	7:lambda x: int(x[0] == x[1])
 }
 
