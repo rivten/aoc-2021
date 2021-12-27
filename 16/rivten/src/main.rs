@@ -38,7 +38,7 @@ struct OperatorPacket {
 #[derive(Debug)]
 struct LiteralValuePacket {
     //header: PacketHeader,
-    value: u32,
+    value: u128,
 }
 
 type BR<'a> = bitstream_io::read::BitReader<&'a [u8], bitstream_io::BigEndian>;
@@ -59,13 +59,13 @@ fn parse_literal_value_packet(bit_reader: &mut BR) -> (u32, LiteralValuePacket) 
     let mut bits_parsed = 0;
     while bit_reader.read::<u8>(1).unwrap() == 1 {
         value <<= 4;
-        value += bit_reader.read::<u32>(4).unwrap();
+        value += bit_reader.read::<u128>(4).unwrap();
         bits_parsed += 5;
     }
 
     // NOTE: we need to do it once more after we see a 0
     value <<= 4;
-    value += bit_reader.read::<u32>(4).unwrap();
+    value += bit_reader.read::<u128>(4).unwrap();
     bits_parsed += 5;
 
     //(bits_parsed, LiteralValuePacket { header, value })
