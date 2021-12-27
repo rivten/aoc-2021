@@ -2,7 +2,7 @@ use std::io::BufRead;
 
 struct PathIterator<'a> {
     graph: &'a std::collections::HashMap<String, Vec<String>>,
-    stack: Vec<(Vec<String>, Vec<String>)>,
+    stack: Vec<(Vec<&'a str>, Vec<&'a str>)>,
 }
 
 impl<'a> PathIterator<'a> {
@@ -10,15 +10,20 @@ impl<'a> PathIterator<'a> {
         Self {
             graph,
             stack: vec![(
-                vec!["start".to_string()],
-                graph.get("start").unwrap().clone(),
+                vec!["start"],
+                graph
+                    .get("start")
+                    .unwrap()
+                    .iter()
+                    .map(String::as_str)
+                    .collect(),
             )],
         }
     }
 }
 
-impl std::iter::Iterator for PathIterator<'_> {
-    type Item = Vec<String>;
+impl<'a> std::iter::Iterator for PathIterator<'a> {
+    type Item = Vec<&'a str>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let (next_path_to_evaluate, next_possible_vertices) = self.stack.pop()?;
@@ -30,8 +35,9 @@ impl std::iter::Iterator for PathIterator<'_> {
             }
             let mut to_push = next_path_to_evaluate.clone();
             to_push.push(v.clone());
-            if let Some(next_vertices) = self.graph.get(&v) {
-                self.stack.push((to_push, next_vertices.clone()));
+            if let Some(next_vertices) = self.graph.get(v) {
+                self.stack
+                    .push((to_push, next_vertices.iter().map(String::as_str).collect()));
             } else {
                 self.stack.push((to_push, vec![]));
             }
@@ -73,7 +79,7 @@ fn main() {
     println!(
         "{}",
         path_iterator
-            .filter(|path| path.iter().last().unwrap() == "end")
+            .filter(|path| path.iter().last().unwrap() == &"end")
             .count()
     );
 }
