@@ -62,6 +62,7 @@ fn main() {
     let max_vx0_to_test = target_max_x + 1;
     let min_vy0_to_test = target_min_y - 1;
     let mut highest_y = 0;
+    let mut valid_shot_count = 0;
     for vx0 in 0..(max_vx0_to_test + 1) {
         println!("Setting vx0 = {}", vx0);
         let max_vy0_to_test = std::cmp::max(vx0, -target_min_y - 1);
@@ -82,6 +83,7 @@ fn main() {
                 {
                     is_valid_shot = true;
                     println!("SHOT IS VALID");
+                    valid_shot_count += 1;
                     break;
                 }
                 n += 1;
@@ -93,4 +95,5 @@ fn main() {
     }
 
     println!("{}", highest_y);
+    println!("{}", valid_shot_count);
 }
